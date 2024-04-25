@@ -3,20 +3,27 @@ package api
 import (
 	"encoding/json"
 	"net/http"
-	"github.com/Bonittas/GoCrudChallenge/api"
 
-	"github.com/Bonittas/GoCrudChallenge/database"
-	"github.com/Bonittas/GoCrudChallenge/model"
+	"github.com/Bonittas/GoCrudChallenge/models"
 )
 
-type Handler struct {
-	db database.Database
+// Database interface defines the methods for interacting with the database.
+type Database interface {
+	GetAllPersons() ([]model.Person, error)
+	GetPersonByID(id string) (*model.Person, error)
+	CreatePerson(person *model.Person) error
+	UpdatePerson(id string, person *model.Person) (*model.Person, error) // Corrected return signature
+	DeletePerson(id string) error
 }
 
-func NewHandler() *Handler {
-	return &Handler{
-		db: database.NewInMemoryDB(),
-	}
+// Handler struct represents the API handler.
+type Handler struct {
+	db Database
+}
+
+// NewHandler creates a new instance of the API handler.
+func NewHandler(db Database) *Handler {
+	return &Handler{db: db}
 }
 
 func (h *Handler) GetPersons(w http.ResponseWriter, r *http.Request) {
@@ -88,6 +95,7 @@ func (h *Handler) UpdatePerson(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Update the method call to accept two return values
 	updatedPerson, err := h.db.UpdatePerson(id, &person)
 	if err != nil {
 		h.respondWithError(w, http.StatusInternalServerError, "Internal server error")

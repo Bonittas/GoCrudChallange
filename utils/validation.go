@@ -4,7 +4,7 @@ import (
 	"errors"
 	"regexp"
 
-	"github.com/Bonittas/GoCrudChallenge/model"
+	"github.com/Bonittas/GoCrudChallenge/models"
 )
 
 // ValidatePerson validates the fields of a Person object.

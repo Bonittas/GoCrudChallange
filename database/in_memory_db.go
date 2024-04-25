@@ -4,7 +4,7 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/Bonittas/GoCrudChallenge/model"
+	"github.com/Bonittas/GoCrudChallenge/models"
 	"github.com/google/uuid"
 )
 
@@ -43,20 +43,26 @@ func (db *InMemoryDB) GetPersonByID(id string) (*model.Person, error) {
 	return person, nil
 }
 
-func (db *InMemoryDB) CreatePerson(person *model.Person) (*model.Person, error) {
+func (db *InMemoryDB) CreatePerson(person *model.Person) error {
 	if person.ID == "" {
 		person.ID = uuid.New().String()
 	}
 
 	if err := db.validatePerson(person); err != nil {
-		return nil, err
+		return err
 	}
 
 	db.mu.Lock()
 	defer db.mu.Unlock()
 
+	// Check if person ID already exists
+	if _, ok := db.persons[person.ID]; ok {
+		return errors.New("person ID already exists")
+	}
+
+	// Add the person to the database
 	db.persons[person.ID] = person
-	return person, nil
+	return nil
 }
 
 func (db *InMemoryDB) UpdatePerson(id string, person *model.Person) (*model.Person, error) {
@@ -68,7 +74,7 @@ func (db *InMemoryDB) UpdatePerson(id string, person *model.Person) (*model.Pers
 	defer db.mu.Unlock()
 
 	if _, ok := db.persons[id]; !ok {
-		return nil, nil
+		return nil, errors.New("person not found")
 	}
 
 	person.ID = id
