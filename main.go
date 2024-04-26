@@ -1,31 +1,27 @@
 package main
 
 import (
-	"log"
-	"net/http"
+    "log"
+    "net/http"
 
-	"github.com/Bonittas/GoCrudChallenge/api"
-	"github.com/Bonittas/GoCrudChallenge/database"
+    "github.com/Bonittas/GoCrudChallenge/api"
+    "github.com/Bonittas/GoCrudChallenge/database"
+    "github.com/Bonittas/GoCrudChallenge/routes"
 )
 
 func main() {
-	// Create a new instance of the database
-	db := database.NewInMemoryDB()
+    // Create a new instance of the database
+    db := database.NewInMemoryDB()
 
-	// Create a new instance of the API handler with the database
-	handler := api.NewHandler(db)
+    // Create a new instance of the API handler with the database
+    handler := api.NewHandler(db)
 
-	// Set up routes
-	http.HandleFunc("/person", handler.GetPersons)
-	http.HandleFunc("/person/", handler.GetPerson)
-	http.HandleFunc("/person/create", handler.CreatePerson)
-	http.HandleFunc("/person/update", handler.UpdatePerson)
-	http.HandleFunc("/person/delete", handler.DeletePerson)
+    // Register routes
+    routes.RegisterRoutes(handler)
 
-	// Apply CORS middleware to the router
-	routerWithCORS := api.CORS(http.DefaultServeMux)
+    // Apply CORS middleware to the router
+    routerWithCORS := api.CORS(http.DefaultServeMux)
 
-	// Start the server with the CORS-enabled router
-	log.Println("Server is running on port 8080...")
-	log.Fatal(http.ListenAndServe(":8080", routerWithCORS))
+    log.Println("Server is running on port 8080...")
+    log.Fatal(http.ListenAndServe(":8080", routerWithCORS))
 }
